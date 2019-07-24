@@ -31,7 +31,9 @@ import static android.view.Gravity.CENTER;
 
 public class MainActivity extends Activity {
     String dominio = "http://192.168.1.99:8080"; // Beto ip
+    //String dominio = "http://pandora.databv4.com:9743"; // Beto ip
     Boolean socketisConnect = false;
+    JSONObject prueba = new JSONObject();
 
     TextView txtResul;
     public Socket mSocket;
@@ -53,31 +55,32 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //abrir el sockect
-//        mSocket.emit("connected");
-////        mSocket.on("messages", onNewMessage);
-//        mSocket.connect();
+        try {
+            prueba.put("action", "login");
+            prueba.put("UserId", "prueba");
+            prueba.put("DeviceId", "HH13");
+            prueba.put("idCEDIS", "art");
+        } catch (JSONException ex) {
+            Log.i("error_____________ ", ex.toString());
+        }
         txtResul = (TextView) findViewById(R.id.txtResultado);
         Log.i("_____________>", "algo  " + mSocket.connect());
+        mSocket.emit("connected",prueba);
+        mSocket.connect();
         new ProcessTask().execute();
     }
 
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-
             try {
                 JSONObject data = (JSONObject) args[0];
                 txtResul.setText("resul" + data.toString());
                 mensaje(data);
-
                 Log.i("===>", "data  " + data);
-
             } catch (Exception e) {
                 Log.i("===>", "error  " + e);
             }
-
-
         }
     };
 
@@ -132,8 +135,8 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            mSocket.emit("connected");
-            mSocket.connect();
+//            mSocket.emit("connected");
+//            mSocket.connect();
         }
 
         @Override
@@ -142,8 +145,7 @@ public class MainActivity extends Activity {
             mSocket.on("messages", onNewMessage);
             return null;
         }
-
-
+        
         public void disconnect() {
             try {
                 Log.d(TAG, "Closing the socket connection.");
