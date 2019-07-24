@@ -31,6 +31,7 @@ import static android.view.Gravity.CENTER;
 public class MainActivity extends Activity {
     String dominio = "http://192.168.1.99:8080"; // Beto ip
     Boolean socketisConnect = false;
+    ProcessTask PT;
 
     public Socket mSocket;
 
@@ -51,20 +52,20 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //abrir el sockect
-//        mSocket.emit("connected");
-////        mSocket.on("messages", onNewMessage);
         mSocket.emit("connected");
         mSocket.connect();
-//        Log.i("_____________>", "algo  " + mSocket.connect());
-        //new ProcessTask().execute();
+        PT = new ProcessTask();
+        PT.execute();
     }
 
     protected void onStart () {
+        Log.i("_____________>", "on start");
         super.onStart();
-        //setContentView(R.layout.activity_main);
-        Log.i("_____________>", "algo inicia");
-        new ProcessTask().execute();
+    }
+
+    protected void onRestart (){
+        Log.i("_____________>", "on restart");
+        super.onRestart();
     }
 
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
@@ -107,17 +108,18 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            //mSocket.emit("connected");
-            //mSocket.connect();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            //Log.i("===>","vete a la verga Gus");
             mSocket.on("messages", onNewMessage);
             return null;
         }
 
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+        }
 
         public void disconnect() {
             try {
