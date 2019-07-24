@@ -54,8 +54,16 @@ public class MainActivity extends Activity {
         //abrir el sockect
 //        mSocket.emit("connected");
 ////        mSocket.on("messages", onNewMessage);
-//        mSocket.connect();
-        Log.i("_____________>", "algo  " + mSocket.connect());
+        mSocket.emit("connected");
+        mSocket.connect();
+//        Log.i("_____________>", "algo  " + mSocket.connect());
+        //new ProcessTask().execute();
+    }
+
+    protected void onStart () {
+        super.onStart();
+        //setContentView(R.layout.activity_main);
+        Log.i("_____________>", "algo inicia");
         new ProcessTask().execute();
     }
 
@@ -99,13 +107,13 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            mSocket.emit("connected");
-            mSocket.connect();
+            //mSocket.emit("connected");
+            //mSocket.connect();
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.i("===>","vete a la verga Gus");
+            //Log.i("===>","vete a la verga Gus");
             mSocket.on("messages", onNewMessage);
             return null;
         }
