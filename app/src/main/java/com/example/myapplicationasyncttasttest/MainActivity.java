@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter.Listener;
@@ -32,6 +33,7 @@ public class MainActivity extends Activity {
     String dominio = "http://192.168.1.99:8080"; // Beto ip
     Boolean socketisConnect = false;
 
+    TextView txtResul;
     public Socket mSocket;
 
     {
@@ -55,6 +57,7 @@ public class MainActivity extends Activity {
 //        mSocket.emit("connected");
 ////        mSocket.on("messages", onNewMessage);
 //        mSocket.connect();
+        txtResul = (TextView) findViewById(R.id.txtResultado);
         Log.i("_____________>", "algo  " + mSocket.connect());
         new ProcessTask().execute();
     }
@@ -62,19 +65,49 @@ public class MainActivity extends Activity {
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        JSONObject data = (JSONObject) args[0];
-                        Log.i("===>","data  "+data);
-                    }catch(Exception e){
-                        Log.i("===>","error  "+e);
-                    }
-                }
-            });
+
+            try {
+                JSONObject data = (JSONObject) args[0];
+                txtResul.setText("resul" + data.toString());
+                mensaje(data);
+
+                Log.i("===>", "data  " + data);
+
+            } catch (Exception e) {
+                Log.i("===>", "error  " + e);
+            }
+
+
         }
     };
+
+    public void mensaje( final JSONObject data) {
+        runOnUiThread(new Runnable() {
+            public void run () {
+            Toast tm = Toast.makeText(getApplicationContext(), "llego un dato ese --> "+data, Toast.LENGTH_LONG);
+                tm.setGravity(CENTER,0,0);
+                tm.show();}
+        });
+    }
+
+//    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+//        @Override
+//        public void call(final Object... args) {
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try{
+//                        JSONObject data = (JSONObject) args[0];
+//                        Log.i("===>","data  "+data);
+//                    }catch(Exception e){
+//                        Log.i("===>","error  "+e);
+//                    }
+//                }
+//            });
+//        }
+//    };
+
+
 //    private Listener onConnect = new Listener() {
 //        @Override
 //        public void call(final Object... args) {
@@ -105,7 +138,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.i("===>","vete a la verga Gus");
+            Log.i("===>", "Dentro de doInBackground");
             mSocket.on("messages", onNewMessage);
             return null;
         }
