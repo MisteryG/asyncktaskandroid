@@ -64,16 +64,10 @@ public class MainActivity extends Activity {
         }
         txtResul = (TextView) findViewById(R.id.txtResultado);
         Log.i("_____________>", "algo  " + mSocket.connect());
-        //mSocket.emit("connected",prueba);
         mSocket.on("connect", onConnect);
         mSocket.connect();
         new ProcessTask().execute();
     }
-
-//    private Emitter.Listener onNewMessage = new Emitter.Listener() {
-//        mSocket.emit("connected",prueba);
-//        mSocket.connect();
-//    };
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
@@ -81,7 +75,6 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //socketisConnect = true;
                     Log.i("--->", "******* CONECTADO ******** ");
                     Toast tm = Toast.makeText(getApplicationContext(), "Se ha conectado con el servicio...", Toast.LENGTH_LONG);
                     tm.setGravity(CENTER, 0, 0);
@@ -116,42 +109,6 @@ public class MainActivity extends Activity {
         });
     }
 
-//    private Emitter.Listener onNewMessage = new Emitter.Listener() {
-//        @Override
-//        public void call(final Object... args) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try{
-//                        JSONObject data = (JSONObject) args[0];
-//                        Log.i("===>","data  "+data);
-//                    }catch(Exception e){
-//                        Log.i("===>","error  "+e);
-//                    }
-//                }
-//            });
-//        }
-//    };
-
-
-//    private Listener onConnect = new Listener() {
-//        @Override
-//        public void call(final Object... args) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    socketisConnect = true;
-//                    Log.i("--->", "*************** CONECTADO ************ " + socketisConnect);
-//                    Toast tm = Toast.makeText(getApplicationContext(), "Se ha conectado con el servicio...", Toast.LENGTH_LONG);
-//                    tm.setGravity(CENTER, 0, 0);
-//                    tm.show();
-//
-//                    mSocket.emit("messages", "Yo merengues");
-//                    Log.i("_____________>","algo"+mSocket.connect());
-//                }
-//            });
-//        }
-//    };
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -173,8 +130,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-//            mSocket.emit("connected");
-//            mSocket.connect();
+
         }
 
         @Override
