@@ -1,16 +1,22 @@
 package com.example.myapplicationasyncttasttest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.github.nkzawa.socketio.client.Socket;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -21,12 +27,23 @@ import org.json.JSONObject;
 import static android.view.Gravity.CENTER;
 
 public class MainActivity extends Activity {
+
+    private static MainActivity myContext;
+    public MainActivity(){
+        myContext = this;
+    }
+    public static MainActivity getInstance() {
+        return myContext;
+    }
+
+
 //    String dominio = "http://192.168.1.99:8080"; // Beto ip
     String dominio = "http://pandora.databv4.com:9743"; // Beto ip
 //    Boolean socketisConnect = false;
     JSONObject prueba = new JSONObject();
     PrinterBluetooh printerBluetooh = new PrinterBluetooh();
     String nameDevice="PR2-886B0FAE4351";
+//    String nameDevice="PR2-CEDIS001";
     LostReceiver lostReceiver = new LostReceiver();
     BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
     IntentFilter intentFilterReceiver = new IntentFilter();
@@ -37,6 +54,9 @@ public class MainActivity extends Activity {
         IO.Options opts = new IO.Options();
         opts.forceNew = false;
         opts.reconnection = true;
+        opts.reconnectionAttempts = 1000;
+        opts.reconnectionDelay = 2000;
+        opts.reconnectionDelayMax = 4000;
         opts.timeout = 5000;
 
         try {
@@ -50,52 +70,75 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        try {
+            conexionBluetooth();
+        } catch (Exception e) {
+            Log.i("error_____________ ", e.toString());
+        }
+
         intentFilterReceiver.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         intentFilterReceiver.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(lostReceiver, intentFilterReceiver);
         intentFilterBluetooth.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilterBluetooth.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilterBluetooth.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        intentFilterBluetooth.addAction(BluetoothDevice.ACTION_CLASS_CHANGED);
         registerReceiver(bluetoothLostReceiver,intentFilterBluetooth);
         try {
             prueba.put("action", "login");
             prueba.put("UserId", "prueba");
-            prueba.put("DeviceId", "HH13");
+//            prueba.put("UserId", "GMM");
+//            prueba.put("DeviceId", "HH01");
+            prueba.put("DeviceId", "HH20");
             prueba.put("idCEDIS", "art");
         } catch (JSONException ex) {
             Log.i("error_____________ ", ex.toString());
         }
         mSocket.on("connect", onConnect);
         mSocket.connect();
-        Log.i("_____________>", "algo  ----------------");
-        try {
-            printerBluetooh.findBT(nameDevice);
-            printerBluetooh.openBT();
-            if (printerBluetooh.activado) {
-                Toast.makeText(getApplicationContext(), "Conexion establecida !!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Error al conectar con el dispositivo", Toast.LENGTH_LONG).show();;
-            }
-        } catch (Exception e) {
-            Log.i("error_____________ ", e.toString());
-        }
         new ProcessTask().execute();
+    }
+
+    public void conexionBluetooth () throws IOException {
+        Integer loop = 0;
+        while (loop<10){
+            Log.i("conteo", "------------------"+loop);
+            try {
+                printerBluetooh.findBT(nameDevice);
+                printerBluetooh.openBT();
+                if (printerBluetooh.activado) {
+                    Log.i("ConexionBT", "---------lograda------------");
+                    break;
+                } else {
+//                    printerBluetooh.closeBT();
+                    TimeUnit.SECONDS.sleep(5);
+                }
+            } catch (Exception e) {
+                Log.i("error_____________ ", e.toString());
+            }
+            loop++;
+        }
+    }
+
+    public static void onSendNotificationsButtonClick(String titulo, String aviso) throws IOException {
+        Log.i("===>", "titulo------------" + titulo);
+        Log.i("===>", "aviso-------------" + aviso);
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(MainActivity.myContext);
+        dialogo.setTitle(""+titulo);
+        dialogo.setMessage(""+aviso);
+        dialogo.setCancelable(false);
+        dialogo.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                //do things
+            }
+        });
+        dialogo.show();
     }
 
     @Override
     protected void onRestart () {
         super.onRestart();
-        try {
-            printerBluetooh.closeBT();
-            printerBluetooh.findBT(nameDevice);
-            printerBluetooh.openBT();
-            if (printerBluetooh.activado) {
-                Toast.makeText(getApplicationContext(), "Conexion establecida !!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Error al conectar con el dispositivo", Toast.LENGTH_LONG).show();;
-            }
-        } catch (Exception e) {
-            Log.i("error_____________ ", e.toString());
-        }
     }
 
     @Override
@@ -103,6 +146,7 @@ public class MainActivity extends Activity {
         super.onDestroy();
         try {
             unregisterReceiver(lostReceiver);
+            unregisterReceiver(bluetoothLostReceiver);
         } catch (Exception e) {
             Log.i("error_____________ ", e.toString());
         }

@@ -20,6 +20,13 @@ import java.util.UUID;
 
 public class PrinterBluetooh extends AppCompatActivity {
 
+    MainActivity main = null;
+
+    public void setMainActivity(MainActivity main)
+    {
+        this.main = main;
+    }
+
     BluetoothAdapter mBluetoothAdapter;
     BluetoothSocket mmSocket;
     BluetoothDevice mmDevice;
@@ -32,6 +39,7 @@ public class PrinterBluetooh extends AppCompatActivity {
     int counter;
     volatile boolean stopWorker;
     boolean activado = false;
+    boolean encontrado = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +56,6 @@ public class PrinterBluetooh extends AppCompatActivity {
     }
 
     void findBT(String nameDevice) {
-
         try {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter == null) {
@@ -63,6 +70,7 @@ public class PrinterBluetooh extends AppCompatActivity {
                 for (BluetoothDevice device : pairedDevices) {
                     if (device.getName().equals(nameDevice)) {
                         mmDevice = device;
+                        encontrado=true;
                         break;
                     }  // fin del if
                 }// fin del for
@@ -75,23 +83,22 @@ public class PrinterBluetooh extends AppCompatActivity {
     }
 
     void openBT() throws IOException {
-        try {
-            // Standard SerialPortService ID
-            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-            mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-            mmSocket.connect();
-            mmOutputStream = mmSocket.getOutputStream();
-            mmInputStream = mmSocket.getInputStream();
-            beginListenForData();
-            activado = true;
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            Log.i("status", "" + e);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.i("status", "" + e);
-
+        Log.i("donde esta-->", "entro openbt "+encontrado);
+        if (encontrado==true) {
+            try {
+                // Standard SerialPortService ID
+                UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+                mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+                mmSocket.connect();
+                mmOutputStream = mmSocket.getOutputStream();
+                mmInputStream = mmSocket.getInputStream();
+                beginListenForData();
+                activado = true;
+            } catch (Exception e) {
+                mmSocket.close();
+                e.printStackTrace();
+                Log.i("status", "" + e);
+            }
         }
     }
 
