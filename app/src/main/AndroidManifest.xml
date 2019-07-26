@@ -19,10 +19,6 @@
             android:enabled="true"
             android:exported="true"></receiver>
         <receiver
-            android:name=".WifiLostReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
             android:name=".BluetoothLostReceiver"
             android:enabled="true"
             android:exported="true" />
