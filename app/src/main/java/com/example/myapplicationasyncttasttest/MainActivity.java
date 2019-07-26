@@ -1,24 +1,12 @@
 package com.example.myapplicationasyncttasttest;
 
 import android.app.Activity;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.nkzawa.emitter.Emitter.Listener;
 import com.github.nkzawa.socketio.client.Socket;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -26,16 +14,17 @@ import com.github.nkzawa.socketio.client.IO;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.content.ContentValues.TAG;
 import static android.view.Gravity.CENTER;
 
 public class MainActivity extends Activity {
 //    String dominio = "http://192.168.1.99:8080"; // Beto ip
     String dominio = "http://pandora.databv4.com:9743"; // Beto ip
-    Boolean socketisConnect = false;
+//    Boolean socketisConnect = false;
     JSONObject prueba = new JSONObject();
+    PrinterBluetooh printerBluetooh = new PrinterBluetooh();
+    String nameDevice="PR2-886B0FAE4351";
 
-    TextView txtResul;
+
     public Socket mSocket;
     {
         IO.Options opts = new IO.Options();
@@ -62,11 +51,38 @@ public class MainActivity extends Activity {
         } catch (JSONException ex) {
             Log.i("error_____________ ", ex.toString());
         }
-        txtResul = (TextView) findViewById(R.id.txtResultado);
-        Log.i("_____________>", "algo  " + mSocket.connect());
         mSocket.on("connect", onConnect);
         mSocket.connect();
+        Log.i("_____________>", "algo  ----------------");
+        try {
+            printerBluetooh.findBT(nameDevice);
+            printerBluetooh.openBT();
+            if (printerBluetooh.activado) {
+                Toast.makeText(getApplicationContext(), "Conexion establecida !!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Error al conectar con el dispositivo", Toast.LENGTH_LONG).show();;
+            }
+        } catch (Exception e) {
+            Log.i("error_____________ ", e.toString());
+        }
         new ProcessTask().execute();
+    }
+
+    @Override
+    protected void onRestart () {
+        super.onRestart();
+        try {
+            printerBluetooh.closeBT();
+            printerBluetooh.findBT(nameDevice);
+            printerBluetooh.openBT();
+            if (printerBluetooh.activado) {
+                Toast.makeText(getApplicationContext(), "Conexion establecida !!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Error al conectar con el dispositivo", Toast.LENGTH_LONG).show();;
+            }
+        } catch (Exception e) {
+            Log.i("error_____________ ", e.toString());
+        }
     }
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
@@ -89,11 +105,15 @@ public class MainActivity extends Activity {
         @Override
         public void call(final Object... args) {
             try {
-                Log.i("------------------>", "conectado ");
                 JSONObject data = (JSONObject) args[0];
-                //txtResul.setText("resul" + data.toString());
                 mensaje(data);
-                Log.i("===>", "data  " + data);
+                if (data.getString("action").equals("imprimir")) {
+                    if (printerBluetooh.sendData(data.getString("LP"))) {
+                        Toast.makeText(getApplicationContext(), "Impresion Correcta", Toast.LENGTH_LONG).show();;
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No se pudo imprimir", Toast.LENGTH_LONG).show();;
+                    }
+                }
             } catch (Exception e) {
                 Log.i("===>", "error  " + e);
             }
@@ -103,7 +123,7 @@ public class MainActivity extends Activity {
     public void mensaje( final JSONObject data) {
         runOnUiThread(new Runnable() {
             public void run () {
-            Toast tm = Toast.makeText(getApplicationContext(), "llego un dato ese --> "+data, Toast.LENGTH_LONG);
+            Toast tm = Toast.makeText(getApplicationContext(), "llego un dato --> "+data, Toast.LENGTH_LONG);
                 tm.setGravity(CENTER,0,0);
                 tm.show();}
         });
@@ -115,7 +135,6 @@ public class MainActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-//                    socketisConnect =false;
                     Log.i("------------------>", "desconectado ");
                     Toast toast = Toast.makeText(getApplicationContext(), "Se perdió la conexion", Toast.LENGTH_LONG);
                     toast.setGravity(CENTER, 0, 0);
@@ -130,19 +149,14 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.i("===>", "Dentro de doInBackground");
+//            Log.i("===>", "Dentro de doInBackground");
             mSocket.on("messages", onNewConnection);
             mSocket.on("disconnect", onDisconnect);
             return null;
         }
-
-
-
     }
-
 }

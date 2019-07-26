@@ -52,7 +52,6 @@ public class PrinterBluetooh extends AppCompatActivity {
         try {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter == null) {
-                // myLabel.setText("Bluetooth no disponible... puede reintentar");
                 Log.i("resul conection-->", "no se pudo conectar");
             }
             if (!mBluetoothAdapter.isEnabled()) {
@@ -85,12 +84,14 @@ public class PrinterBluetooh extends AppCompatActivity {
             mmInputStream = mmSocket.getInputStream();
             beginListenForData();
             activado = true;
+
         } catch (NullPointerException e) {
             e.printStackTrace();
             Log.i("status", "" + e);
         } catch (Exception e) {
             e.printStackTrace();
             Log.i("status", "" + e);
+
         }
     }
 
