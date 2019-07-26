@@ -1,6 +1,10 @@
 package com.example.myapplicationasyncttasttest;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,7 +27,10 @@ public class MainActivity extends Activity {
     JSONObject prueba = new JSONObject();
     PrinterBluetooh printerBluetooh = new PrinterBluetooh();
     String nameDevice="PR2-886B0FAE4351";
-
+    LostReceiver lostReceiver = new LostReceiver();
+    BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
+    IntentFilter intentFilterReceiver = new IntentFilter();
+    IntentFilter intentFilterBluetooth = new IntentFilter();
 
     public Socket mSocket;
     {
@@ -43,6 +50,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        intentFilterReceiver.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        intentFilterReceiver.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(lostReceiver, intentFilterReceiver);
+        intentFilterBluetooth.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilterBluetooth.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(bluetoothLostReceiver,intentFilterBluetooth);
         try {
             prueba.put("action", "login");
             prueba.put("UserId", "prueba");
@@ -80,6 +93,16 @@ public class MainActivity extends Activity {
             } else {
                 Toast.makeText(getApplicationContext(), "Error al conectar con el dispositivo", Toast.LENGTH_LONG).show();;
             }
+        } catch (Exception e) {
+            Log.i("error_____________ ", e.toString());
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        try {
+            unregisterReceiver(lostReceiver);
         } catch (Exception e) {
             Log.i("error_____________ ", e.toString());
         }
