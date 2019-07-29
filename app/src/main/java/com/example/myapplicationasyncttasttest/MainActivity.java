@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     JSONObject prueba = new JSONObject();
     static PrinterBluetooh printerBluetooh = new PrinterBluetooh();
     static String nameDevice="PR2-886B0FAE4351";
-//    String nameDevice="PR2-CEDIS001";
+//    static String nameDevice="PR2-CEDIS001";
     LostReceiver lostReceiver = new LostReceiver();
     BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
     IntentFilter intentFilterReceiver = new IntentFilter();
@@ -91,17 +91,17 @@ public class MainActivity extends Activity {
         registerReceiver(bluetoothLostReceiver,intentFilterBluetooth);
         try {
             prueba.put("action", "login");
-            prueba.put("UserId", "prueba");
 //            prueba.put("UserId", "GMM");
 //            prueba.put("DeviceId", "HH01");
+            prueba.put("UserId", "prueba");
             prueba.put("DeviceId", "HH13");
             prueba.put("idCEDIS", "art");
         } catch (JSONException ex) {
             Log.i("error_____________ ", ex.toString());
         }
-        mSocket.on("connect", onConnect);
-        mSocket.connect();
         new ProcessTask().execute();
+//        mSocket.on("connect", onConnect);
+        mSocket.connect();
     }
 
 //    public void conexionBluetooth () throws IOException {
@@ -258,6 +258,7 @@ public class MainActivity extends Activity {
 //            Log.i("===>", "Dentro de doInBackground");
             mSocket.on("messages", onNewConnection);
             mSocket.on("disconnect", onDisconnect);
+            mSocket.on("connect", onConnect);
             return null;
         }
     }
