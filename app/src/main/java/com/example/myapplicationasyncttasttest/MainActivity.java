@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.github.nkzawa.socketio.client.Socket;
@@ -41,8 +41,8 @@ public class MainActivity extends Activity {
     String dominio = "http://pandora.databv4.com:9743"; // Beto ip
 //    Boolean socketisConnect = false;
     JSONObject prueba = new JSONObject();
-    PrinterBluetooh printerBluetooh = new PrinterBluetooh();
-    String nameDevice="PR2-886B0FAE4351";
+    static PrinterBluetooh printerBluetooh = new PrinterBluetooh();
+    static String nameDevice="PR2-886B0FAE4351";
 //    String nameDevice="PR2-CEDIS001";
     LostReceiver lostReceiver = new LostReceiver();
     BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         IO.Options opts = new IO.Options();
         opts.forceNew = false;
         opts.reconnection = true;
-        opts.reconnectionAttempts = 1000;
+        opts.reconnectionAttempts = 999999;
         opts.reconnectionDelay = 2000;
         opts.reconnectionDelayMax = 4000;
         opts.timeout = 5000;
@@ -70,6 +70,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        WifiManager wmgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wmgr.setWifiEnabled(true);
 
         try {
             conexionBluetooth();
@@ -90,7 +93,7 @@ public class MainActivity extends Activity {
             prueba.put("UserId", "prueba");
 //            prueba.put("UserId", "GMM");
 //            prueba.put("DeviceId", "HH01");
-            prueba.put("DeviceId", "HH20");
+            prueba.put("DeviceId", "HH13");
             prueba.put("idCEDIS", "art");
         } catch (JSONException ex) {
             Log.i("error_____________ ", ex.toString());
@@ -100,7 +103,28 @@ public class MainActivity extends Activity {
         new ProcessTask().execute();
     }
 
-    public void conexionBluetooth () throws IOException {
+//    public void conexionBluetooth () throws IOException {
+//        Integer loop = 0;
+//        while (loop<10){
+//            Log.i("conteo", "------------------"+loop);
+//            try {
+//                printerBluetooh.findBT(nameDevice);
+//                printerBluetooh.openBT();
+//                if (printerBluetooh.activado) {
+//                    Log.i("ConexionBT", "---------lograda------------");
+//                    break;
+//                } else {
+////                    printerBluetooh.closeBT();
+//                    TimeUnit.SECONDS.sleep(5);
+//                }
+//            } catch (Exception e) {
+//                Log.i("error_____________ ", e.toString());
+//            }
+//            loop++;
+//        }
+//    }
+
+    public static void conexionBluetooth () throws IOException {
         Integer loop = 0;
         while (loop<10){
             Log.i("conteo", "------------------"+loop);
@@ -147,6 +171,8 @@ public class MainActivity extends Activity {
         try {
             unregisterReceiver(lostReceiver);
             unregisterReceiver(bluetoothLostReceiver);
+            printerBluetooh.closeBT();
+            mSocket.close();
         } catch (Exception e) {
             Log.i("error_____________ ", e.toString());
         }
@@ -214,9 +240,9 @@ public class MainActivity extends Activity {
 
     public class ProcessTask extends android.os.AsyncTask<Void, Void, Void> {
 
-        @Override
-        protected void onPreExecute() {
-        }
+//        @Override
+//        protected void onPreExecute() {
+//        }
 
         @Override
         protected Void doInBackground(Void... params) {

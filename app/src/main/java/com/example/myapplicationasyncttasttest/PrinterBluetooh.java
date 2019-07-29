@@ -10,8 +10,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,13 +17,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class PrinterBluetooh extends AppCompatActivity {
-
-    MainActivity main = null;
-
-    public void setMainActivity(MainActivity main)
-    {
-        this.main = main;
-    }
 
     BluetoothAdapter mBluetoothAdapter;
     BluetoothSocket mmSocket;
@@ -56,12 +47,15 @@ public class PrinterBluetooh extends AppCompatActivity {
     }
 
     void findBT(String nameDevice) {
+        activado = false;
+        encontrado = false;
         try {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter == null) {
                 Log.i("resul conection-->", "no se pudo conectar");
             }
             if (!mBluetoothAdapter.isEnabled()) {
+                mBluetoothAdapter.enable();
                 Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBluetooth, 0);
             }
@@ -193,8 +187,6 @@ public class PrinterBluetooh extends AppCompatActivity {
             mmOutputStream.close();
             mmInputStream.close();
             mmSocket.close();
-            Toast t = Toast.makeText(this, "Bluetooth cerrado", Toast.LENGTH_SHORT);
-            t.show();
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (Exception e) {

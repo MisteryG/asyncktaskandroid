@@ -12,13 +12,6 @@ import android.widget.Toast;
 
 public class BluetoothLostReceiver extends BroadcastReceiver {
 
-//    MainActivity main = null;
-//
-//    public void setMainActivity(MainActivity main)
-//    {
-//        this.main = main;
-//    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
@@ -28,11 +21,11 @@ public class BluetoothLostReceiver extends BroadcastReceiver {
                 break;
             case BluetoothDevice.ACTION_ACL_DISCONNECTED:
                 Log.i("ConexionDispositivoBT", "-------ACTION_ACL_DISCONNECTED-----------------");
-//                try {
-//                    main.conexionBluetooth();
-//                } catch (Exception e){
-//                    Log.i("ConexionDispositivoBT", "-------Valio-----------------");
-//                }
+                try {
+                    MainActivity.conexionBluetooth();
+                } catch (Exception e){
+                    Log.i("ConexionDispositivoBT", "-------Valio-----------------");
+                }
                 break;
             case BluetoothDevice.ACTION_CLASS_CHANGED:
                 Log.i("ConexionDispositivoBT", "-------ACTION_CLASS_CHANGED-----------------");

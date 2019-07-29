@@ -1,18 +1,11 @@
 package com.example.myapplicationasyncttasttest;
 
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.io.IOException;
-
-import static android.view.Gravity.CENTER;
 
 public class LostReceiver extends BroadcastReceiver {
 
@@ -23,11 +16,10 @@ public class LostReceiver extends BroadcastReceiver {
             if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
                 Log.i("ConexionWifi", "-------correcta-----------------");
             } else {
-//                Log.i("ConexionWifi", "-------erronea-----------------");
                 try {
                     MainActivity.onSendNotificationsButtonClick("Conexión WIFI", "WIFI desconectado, favor de encenderlo");
                 } catch (Exception e) {
-                    Log.i("ConexionBluetooth", "-------OPSSSSS----------------");
+                    Log.i("ConexionWifi", "-------OPSSSSS----------------");
                 }
             }
         } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
@@ -35,7 +27,8 @@ public class LostReceiver extends BroadcastReceiver {
             switch(state) {
                 case BluetoothAdapter.STATE_OFF:
                     try {
-//                        main.onSendNotificationsButtonClick("Conexión Bluetooth", "Bluetooth desconectado, favor de encenderlo");
+                        MainActivity.onSendNotificationsButtonClick("Conexión Bluetooth", "Bluetooth desconectado, favor de encenderlo");
+                        MainActivity.conexionBluetooth();
                     } catch (Exception e) {
                         Log.i("ConexionBluetooth", "-------OPSSSSS----------------");
                     }
