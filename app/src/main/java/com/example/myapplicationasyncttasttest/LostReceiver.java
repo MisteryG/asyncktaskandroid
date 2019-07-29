@@ -18,6 +18,11 @@ public class LostReceiver extends BroadcastReceiver {
             } else {
                 try {
                     MainActivity.onSendNotificationsButtonClick("Conexión WIFI", "WIFI desconectado, favor de encenderlo");
+                    Intent intentHome = new Intent(context, MainActivity.class);
+                    intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intentHome.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//                    intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intentHome);
                 } catch (Exception e) {
                     Log.i("ConexionWifi", "-------OPSSSSS----------------");
                 }

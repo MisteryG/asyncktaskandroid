@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -143,6 +144,14 @@ public class MainActivity extends Activity {
             }
             loop++;
         }
+    }
+
+    public void sendToFront() {
+        Intent intentHome = new Intent(myContext, MainActivity.class);
+        intentHome.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intentHome.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//        intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intentHome);
     }
 
     public static void onSendNotificationsButtonClick(String titulo, String aviso) throws IOException {
