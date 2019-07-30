@@ -1,5 +1,6 @@
 package com.example.myapplicationasyncttasttest;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -8,20 +9,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.github.nkzawa.socketio.client.Socket;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
-
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,8 +47,10 @@ public class MainActivity extends Activity {
 //    static String nameDevice="PR2-CEDIS001";
     LostReceiver lostReceiver = new LostReceiver();
     BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
+    ConnectivityReceiver connectivityReceiver = new ConnectivityReceiver();
     IntentFilter intentFilterReceiver = new IntentFilter();
     IntentFilter intentFilterBluetooth = new IntentFilter();
+    IntentFilter intentFilterConnectivity = new IntentFilter();
 
     public Socket mSocket;
     {
@@ -89,6 +91,9 @@ public class MainActivity extends Activity {
         intentFilterBluetooth.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         intentFilterBluetooth.addAction(BluetoothDevice.ACTION_CLASS_CHANGED);
         registerReceiver(bluetoothLostReceiver,intentFilterBluetooth);
+        intentFilterConnectivity.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilterConnectivity.addAction(WifiManager.EXTRA_NETWORK_INFO);
+        registerReceiver(connectivityReceiver,intentFilterConnectivity);
         try {
             prueba.put("action", "login");
 //            prueba.put("UserId", "GMM");
@@ -102,6 +107,7 @@ public class MainActivity extends Activity {
         new ProcessTask().execute();
 //        mSocket.on("connect", onConnect);
         mSocket.connect();
+
     }
 
 //    public void conexionBluetooth () throws IOException {
@@ -146,13 +152,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void sendToFront() {
-        Intent intentHome = new Intent(myContext, MainActivity.class);
-        intentHome.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intentHome.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//    public void sendToFront() {
+//        Intent intentHome = new Intent(myContext, MainActivity.class);
+//        intentHome.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        intentHome.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 //        intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intentHome);
-    }
+//        startActivity(intentHome);
+//    }
 
     public static void onSendNotificationsButtonClick(String titulo, String aviso) throws IOException {
         Log.i("===>", "titulo------------" + titulo);
@@ -175,11 +181,28 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onStart () { super.onStart(); }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    public static boolean isNetworkOnline1(Context context) {
+        boolean isOnline = false;
+        try {
+            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkCapabilities capabilities = manager.getNetworkCapabilities(manager.getActiveNetwork());  // need ACCESS_NETWORK_STATE permission
+            isOnline = capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isOnline;
+    }
+
+    @Override
     protected void onDestroy(){
         super.onDestroy();
         try {
             unregisterReceiver(lostReceiver);
             unregisterReceiver(bluetoothLostReceiver);
+            unregisterReceiver(connectivityReceiver);
             printerBluetooh.closeBT();
             mSocket.close();
         } catch (Exception e) {

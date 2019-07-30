@@ -17,9 +17,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <receiver
-            android:name=".LostReceiver"
+            android:name=".ConnectivityReceiver"
             android:enabled="true"
             android:exported="true"></receiver>
+        <receiver
+            android:name=".LostReceiver"
+            android:enabled="true"
+            android:exported="true" />
         <receiver
             android:name=".BluetoothLostReceiver"
             android:enabled="true"
