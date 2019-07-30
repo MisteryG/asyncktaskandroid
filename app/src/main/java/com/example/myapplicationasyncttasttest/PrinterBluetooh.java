@@ -46,7 +46,37 @@ public class PrinterBluetooh extends AppCompatActivity {
         }
     }
 
-    void findBT(String nameDevice) {
+//    void findBT(String nameDevice) {
+//        activado = false;
+//        encontrado = false;
+//        try {
+//            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//            if (mBluetoothAdapter == null) {
+//                Log.i("resul conection-->", "no se pudo conectar");
+//            }
+//            if (!mBluetoothAdapter.isEnabled()) {
+//                mBluetoothAdapter.enable();
+//                Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                startActivityForResult(enableBluetooth, 0);
+//            }
+//            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+//            if (pairedDevices.size() > 0) {
+//                for (BluetoothDevice device : pairedDevices) {
+//                    if (device.getName().equals(nameDevice)) {
+//                        mmDevice = device;
+//                        encontrado=true;
+//                        break;
+//                    }  // fin del if
+//                }// fin del for
+//            }
+//        } catch (NullPointerException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    void findBT() {
         activado = false;
         encontrado = false;
         try {
@@ -62,11 +92,14 @@ public class PrinterBluetooh extends AppCompatActivity {
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
             if (pairedDevices.size() > 0) {
                 for (BluetoothDevice device : pairedDevices) {
-                    if (device.getName().equals(nameDevice)) {
-                        mmDevice = device;
-                        encontrado=true;
-                        break;
-                    }  // fin del if
+                    mmDevice = device;
+                    encontrado=true;
+                    break;
+//                    if (device.getName().equals(nameDevice)) {
+//                        mmDevice = device;
+//                        encontrado=true;
+//                        break;
+//                    }  // fin del if
                 }// fin del for
             }
         } catch (NullPointerException e) {

@@ -39,18 +39,24 @@ public class MainActivity extends Activity {
 
 
 //    String dominio = "http://192.168.1.99:8080"; // Beto ip
-    String dominio = "http://pandora.databv4.com:9743"; // Beto ip
-//    Boolean socketisConnect = false;
-    JSONObject prueba = new JSONObject();
+    String dominio = "http://pandora.databv4.com:9743"; // Desarrollo ip
+    JSONObject settings = new JSONObject();
+    String filename = "config".toString();
     static PrinterBluetooh printerBluetooh = new PrinterBluetooh();
-    static String nameDevice="PR2-886B0FAE4351";
-//    static String nameDevice="PR2-CEDIS001";
+//    static String nameDevice="PR2-886B0FAE4351";
     LostReceiver lostReceiver = new LostReceiver();
     BluetoothLostReceiver bluetoothLostReceiver = new BluetoothLostReceiver();
     ConnectivityReceiver connectivityReceiver = new ConnectivityReceiver();
     IntentFilter intentFilterReceiver = new IntentFilter();
     IntentFilter intentFilterBluetooth = new IntentFilter();
     IntentFilter intentFilterConnectivity = new IntentFilter();
+
+    //variables generales
+    String valorCedis = "";
+    String valorDevice = "";// nombre de la impresora
+    String valoruser = "";
+    String usuario = "";
+    String devicetext = "";
 
     public Socket mSocket;
     {
@@ -83,6 +89,8 @@ public class MainActivity extends Activity {
             Log.i("error_____________ ", e.toString());
         }
 
+        settings=leerSettings();
+
         intentFilterReceiver.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         intentFilterReceiver.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(lostReceiver, intentFilterReceiver);
@@ -94,49 +102,17 @@ public class MainActivity extends Activity {
         intentFilterConnectivity.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilterConnectivity.addAction(WifiManager.EXTRA_NETWORK_INFO);
         registerReceiver(connectivityReceiver,intentFilterConnectivity);
-        try {
-            prueba.put("action", "login");
-//            prueba.put("UserId", "GMM");
-//            prueba.put("DeviceId", "HH01");
-            prueba.put("UserId", "prueba");
-            prueba.put("DeviceId", "HH13");
-            prueba.put("idCEDIS", "art");
-        } catch (JSONException ex) {
-            Log.i("error_____________ ", ex.toString());
-        }
         new ProcessTask().execute();
-//        mSocket.on("connect", onConnect);
         mSocket.connect();
-
     }
-
-//    public void conexionBluetooth () throws IOException {
-//        Integer loop = 0;
-//        while (loop<10){
-//            Log.i("conteo", "------------------"+loop);
-//            try {
-//                printerBluetooh.findBT(nameDevice);
-//                printerBluetooh.openBT();
-//                if (printerBluetooh.activado) {
-//                    Log.i("ConexionBT", "---------lograda------------");
-//                    break;
-//                } else {
-////                    printerBluetooh.closeBT();
-//                    TimeUnit.SECONDS.sleep(5);
-//                }
-//            } catch (Exception e) {
-//                Log.i("error_____________ ", e.toString());
-//            }
-//            loop++;
-//        }
-//    }
 
     public static void conexionBluetooth () throws IOException {
         Integer loop = 0;
         while (loop<10){
             Log.i("conteo", "------------------"+loop);
             try {
-                printerBluetooh.findBT(nameDevice);
+//                printerBluetooh.findBT(nameDevice);
+                printerBluetooh.findBT();
                 printerBluetooh.openBT();
                 if (printerBluetooh.activado) {
                     Log.i("ConexionBT", "---------lograda------------");
@@ -152,13 +128,40 @@ public class MainActivity extends Activity {
         }
     }
 
-//    public void sendToFront() {
-//        Intent intentHome = new Intent(myContext, MainActivity.class);
-//        intentHome.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        intentHome.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//        intentHome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intentHome);
-//    }
+    public JSONObject leerSettings() {
+        JSONObject obj = new JSONObject();
+        try {
+            String readfilename = filename;
+            FileOperations fop = new FileOperations();
+            String text = fop.read(readfilename);
+            Log.i("valor de cadena txt-->", text);
+            JSONObject jsonObject = new JSONObject(text);
+
+            if (text != null) {
+                valorCedis = jsonObject.getString("Cedis");
+                valorDevice = jsonObject.getString("Device");
+                valoruser = jsonObject.getString("usuario");
+                usuario = valoruser.toLowerCase();
+                devicetext = valorDevice.toLowerCase();
+                Log.i("valor de json  txt-->", "" + jsonObject);
+                Log.i("lectura del archivo->", text);
+            } else if (text == null) {
+                Toast.makeText(getApplicationContext(), "No se encontró el archivo. Vuelva a intentarlo.", Toast.LENGTH_SHORT).show();
+                Log.i("--->Files content: ", "no se encontro el archivo");
+            } else {
+                Toast.makeText(getApplicationContext(), "Problemas con el archivo. Vuelva a intentarlo.", Toast.LENGTH_SHORT).show();
+            }
+
+            obj.put("action", "login");
+            obj.put("UserId", valoruser);
+            obj.put("DeviceId", valorDevice);
+            obj.put("idCEDIS", valorCedis);
+
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+        return obj;
+    }
 
     public static void onSendNotificationsButtonClick(String titulo, String aviso) throws IOException {
         Log.i("===>", "titulo------------" + titulo);
@@ -182,19 +185,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onStart () { super.onStart(); }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    public static boolean isNetworkOnline1(Context context) {
-        boolean isOnline = false;
-        try {
-            ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkCapabilities capabilities = manager.getNetworkCapabilities(manager.getActiveNetwork());  // need ACCESS_NETWORK_STATE permission
-            isOnline = capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return isOnline;
-    }
 
     @Override
     protected void onDestroy(){
@@ -220,7 +210,7 @@ public class MainActivity extends Activity {
                     Toast tm = Toast.makeText(getApplicationContext(), "Se ha conectado con el servicio...", Toast.LENGTH_LONG);
                     tm.setGravity(CENTER, 0, 0);
                     tm.show();
-                    mSocket.emit("connected", prueba);
+                    mSocket.emit("connected", settings);
                 }
             });
         }
